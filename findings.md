@@ -1,21 +1,23 @@
 # Model Behavior & Infrastructure Investigation
 
-> Working report. Populate only after running `ati extract`, `ati summarize`, and `ati discover`.
+> **Status:** working report template. Replace placeholders with results from the supplied dataset. Every substantive claim should be backed by trace-level evidence.
 
 ## Executive summary
 
-- TODO: strongest high-confidence model finding.
-- TODO: strongest infrastructure finding.
-- TODO: strongest grader/evaluation finding.
-- TODO: strongest subtle cross-trace finding.
+List 5–10 highest-confidence findings. For each: one-sentence observation, quantitative prevalence, attribution, and confidence.
 
-## Method
+## 1. Dataset and methodology
 
-The analysis separates deterministic trace parsing from LLM-assisted interpretation. Findings are only promoted when supported by trace-level evidence and, where possible, a comparison group.
+- N traces:
+- N models:
+- N runs:
+- N unique tasks:
+- Extraction/version:
+- Important missingness or schema caveats:
 
-## Findings
+## 2. Infrastructure / evaluation findings
 
-### F1 — TODO
+### F1 — [title]
 
 **Observation:**
 
@@ -23,25 +25,46 @@ The analysis separates deterministic trace parsing from LLM-assisted interpretat
 
 **Quantification:**
 
-**Attribution:** model / run / infrastructure / grader / task / unknown
+**Attribution:**
 
 **Alternative explanations:**
 
 **Confidence:**
 
-### F2 — TODO
+**Trace references:** `trace-id`, episode/message index, excerpt.
 
-## Infrastructure / evaluation
+## 3. Model behaviour findings
 
-### I1 — TODO
+### F2 — [title]
 
-## Unresolved hypotheses
+**Observation:**
 
-- TODO
+**Evidence:**
 
-## Limitations
+**Quantification:**
 
-- The dataset is a sample of runs rather than a controlled experiment.
-- Model, run, and task may be confounded unless the allocation is verified.
-- Proxy status alone does not establish causal impact on a trajectory.
-- Textual confidence statements are not evidence of incorrectness without subsequent environmental evidence.
+**Comparison group:**
+
+**Attribution:**
+
+**Alternative explanations:**
+
+**Confidence:**
+
+**Trace references:**
+
+## 4. Cross-run / cross-task effects
+
+Discuss effects that could otherwise be mistaken for model-specific behaviour.
+
+## 5. Distinctive narration / reasoning
+
+Include representative excerpts and corpus-level prevalence. Distinguish style from undesirable behaviour.
+
+## 6. Unresolved hypotheses
+
+Record plausible signals that did not survive verification.
+
+## 7. Limitations
+
+State what the traces cannot establish, including causal attribution where appropriate.

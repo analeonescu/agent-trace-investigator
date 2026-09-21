@@ -1,54 +1,128 @@
-# Discovery pipeline
+# Discovery pipeline design
+
+## Objective
+
+Automatically surface unusual, reproducible and potentially consequential behaviours from long coding-agent traces without putting every trace into an LLM context window.
 
 ## Architecture
 
 ```text
-raw traces
-  -> normalise
-  -> cheap per-trace / per-episode features
-  -> candidate detectors
-       | repeated actions
-       | tool loops
-       | test anomalies
-       | reasoning/action contradictions
-       | proxy errors
-       | status/reward inconsistencies
-       | model/run outliers
-  -> compact evidence packets
-  -> optional LLM investigator
-  -> cross-trace aggregation
-  -> human verification
+                 raw traces
+                     |
+                     v
+          schema normalisation
+                     |
+                     v
+          episode-level records
+                     |
+        +------------+-------------+
+        |                          |
+        v                          v
+ deterministic features       text statistics
+        |                          |
+        +------------+-------------+
+                     |
+                     v
+             candidate detectors
+                     |
+                     v
+             evidence packets
+                     |
+                     v
+          LLM candidate review
+                     |
+                     v
+           cross-trace aggregation
+                     |
+                     v
+              human verification
 ```
 
-## Why this design
+## Candidate detectors
 
-Long traces should not be repeatedly sent to an LLM. Deterministic parsing can process every message cheaply. LLM calls should be reserved for ambiguous candidate episodes and given only the local evidence needed to assess them.
+### Deterministic
 
-A candidate is stronger when it is:
+- exact/repeated tool calls
+- repeated commands after failures
+- tool transition anomalies
+- test strategy anomalies
+- unusual edit/write behaviour
+- proxy error/429 events
+- status/reward inconsistencies
+- trace-level robust outliers
 
-- frequent enough to estimate a rate;
-- concentrated in one model or run;
-- supported by multiple independent traces;
-- temporally linked to an observable outcome;
-- absent or substantially rarer in an appropriate comparison group.
+### Statistical
+
+- model-vs-rest feature contrasts
+- model × run interaction effects
+- within-task comparisons
+- log-odds / TF-IDF language contrasts
+- sequence n-grams
+- clustering/outlier detection
+
+### LLM-assisted
+
+The LLM receives a compact evidence packet rather than the whole trace:
+
+```json
+{
+  "candidate_id": "...",
+  "metadata": {"model": "...", "run": "...", "task_id": "..."},
+  "hypothesis": "...",
+  "evidence": {
+    "reasoning": "...",
+    "content": "...",
+    "tool": "...",
+    "tool_args": "...",
+    "tool_result": "..."
+  }
+}
+```
+
+The judge must separately return:
+
+1. directly observed behaviour
+2. interpretation
+3. likely attribution
+4. alternative explanations
+5. confidence
+6. a follow-up test
 
 ## False-positive control
 
-1. **Require a comparison group.** A repeated read is not interesting if every model does it at the same rate.
-2. **Separate observation from explanation.** The detector says what happened; the LLM may propose why.
-3. **Search for counterexamples.** Every promising finding gets a denominator and examples where the behavior does not occur.
-4. **Condition on task/run.** Aggregate rates can be confounded by task difficulty or run configuration.
-5. **Use two-stage review.** High-recall cheap detectors followed by lower-recall semantic review.
-6. **Keep uncertainty explicit.** Unknown attribution is preferable to overclaiming model causality.
+A candidate should not become a report finding solely because an LLM calls it interesting. Promote candidates using:
 
-## Scale
+- prevalence above a minimum threshold
+- model/run specificity
+- reproducibility across independent traces
+- strength of local evidence
+- counterexample search
+- confound checks
+- human verification for high-impact findings
 
-For a much larger corpus, persist episode-level records in Parquet/Arrow and compute aggregates incrementally. Candidate detectors can run independently and emit a common candidate schema. LLM judging can be batched, cached by evidence hash, and rate-limited. The raw trace never needs to enter the judge context once a compact evidence packet has been constructed.
+For a model-specific claim, compare against both:
 
-## OpenRouter
+1. all other models, and
+2. the same tasks where available.
 
-OpenRouter exposes an OpenAI-compatible API, so the prototype uses the standard OpenAI Python client with `base_url=https://openrouter.ai/api/v1`. This makes the judge model configurable without changing the pipeline. See the OpenRouter documentation for the current API surface. citeturn0search0turn0search2
+For an infrastructure claim, compare runs and models jointly.
 
-## Inspect AI
+## Scaling
 
-Inspect AI is optional. The forensic pipeline remains framework-independent; an adapter is provided so candidate packets can be turned into evaluator samples if desired.
+The pipeline is embarrassingly parallel at the trace and candidate level. A production version would use a columnar feature store for trace-level data and a queue for LLM candidate review. Cache evidence packets and judge outputs by content hash so repeated investigations do not incur repeated API cost.
+
+A useful scaling hierarchy is:
+
+```text
+all traces
+  ↓  cheap parsing
+all episodes
+  ↓  deterministic detectors
+1–10% candidate episodes
+  ↓  statistical aggregation
+hundreds of evidence packets
+  ↓  LLM review
+small set of verified findings
+```
+
+The exact percentages should be measured rather than assumed on a larger corpus.
