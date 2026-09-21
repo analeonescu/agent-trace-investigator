@@ -1,0 +1,26 @@
+[project]
+name = "agent-trace-investigator"
+version = "0.1.0"
+description = "Structured investigation and discovery pipeline for coding-agent traces"
+requires-python = ">=3.10"
+dependencies = [
+  "datasets>=3.0",
+  "pandas>=2.2",
+  "numpy>=1.26",
+  "scikit-learn>=1.4",
+  "scipy>=1.12",
+  "matplotlib>=3.8",
+  "seaborn>=0.13",
+  "openai>=1.50",
+  "python-dotenv>=1.0",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+inspect = ["inspect-ai>=0.3.100"]
+
+[project.scripts]
+ati = "ati.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
