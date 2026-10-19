@@ -1,8 +1,6 @@
 # Agent Trace Investigator
 
-A forensic, scalable workflow for investigating coding-agent traces for **model behavior**, **infrastructure/evaluation failures**, and **grader anomalies**.
-
-Built for the 4-hour take-home assignment over 370 anonymised SWE-style coding-agent traces.
+A forensic, scalable workflow for investigating coding-agent traces for **model behavior**, **infrastructure/evaluation failures**, and **grader anomalies** over 370 anonymised SWE-style coding-agent traces.
 
 ## Why this approach
 
@@ -168,18 +166,6 @@ Avoid:
 
 The repository is deliberately designed to make the first version easy to replace with stronger detectors as hypotheses emerge.
 
-## Recommended investigation order
-
-For the 4-hour assignment, prioritise:
-
-1. **Infrastructure/evaluation sanity checks** — proxy failures, status/reward semantics, run effects and task allocation.
-2. **Tool fingerprints** — repetitions, loops, transitions and edit/test sequences.
-3. **Within-task model comparisons** — avoid confounding model effects with task mix.
-4. **Reasoning → action mismatches** — claims in reasoning/content contradicted by subsequent tool results.
-5. **Distinctive language** — model-specific narration/reasoning phrases and strategies.
-6. **Outliers** — traces unusual relative to their own model as well as the corpus.
-7. **LLM verification** — only after candidate generation, using small evidence packets.
-
 See [`analysis/README.md`](analysis/README.md) for concrete analyses to add during the take-home.
 
 ## Running tests
@@ -187,21 +173,3 @@ See [`analysis/README.md`](analysis/README.md) for concrete analyses to add duri
 ```bash
 pytest -q
 ```
-
-## GitHub setup
-
-This directory is already a Git repository. To publish it to a new GitHub repository:
-
-```bash
-git remote add origin git@github.com:<YOUR_USERNAME>/agent-trace-investigator.git
-git branch -M main
-git push -u origin main
-```
-
-Or use GitHub CLI:
-
-```bash
-gh repo create agent-trace-investigator --private --source=. --remote=origin --push
-```
-
-Do not commit `.env`, API keys, generated raw traces, or large output files.
